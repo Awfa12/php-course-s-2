@@ -182,6 +182,7 @@ echo "<hr><h3>Namespace Imports and Object Instantiation</h3>";
 
 // Import the Transaction class from the Stripe namespace and alias it as StripeTransaction
 
+use App\Customer;
 use App\Enums\Status;
 use App\PaymentGateway\Stripe\Transaction as StripeTransaction;
 
@@ -580,3 +581,304 @@ echo "<tr><td><strong>Benefit</strong></td><td>Loose coupling, testability</td><
 echo "<tr><td><strong>Example</strong></td><td>GarageService receives vehicles</td><td>operateVehicle() works with any Vehicle</td></tr>";
 echo "<tr><td><strong>When Used</strong></td><td>Object creation and composition</td><td>Method calls and behavior</td></tr>";
 echo "</table>";
+
+
+//////////////////////////////////////
+
+echo "<hr><h3>Magic Methods Example</h3>";
+
+$invoice = new App\Invoice(15, "Invoice Description");
+
+var_dump(isset($invoice->amount)); 
+echo "<br>";
+
+$invoice->amount = 100;
+
+
+var_dump($invoice->amount); // Outputs: 100
+echo "<br>";
+
+var_dump(isset($invoice->amount)); // Outputs: true
+echo "<br>";
+
+unset($invoice->amount);
+
+var_dump(isset($invoice->amount)); // Outputs: false
+echo "<br>";
+
+// call unexisting method
+$invoice->processPaymentT(1, 2); // Outputs: "Processing payment for amount: 100"
+
+// call unexisting method static way 
+App\Invoice::processPaymentT(1, 2); // Outputs: "Method processPayment does not exist in App\Invoice"
+
+// call existing method
+$invoice->processPayment(1, "hello"); // Outputs: "Processing payment of $1 for hello"
+
+$invoice->amount = 100;
+
+echo $invoice;
+
+var_dump(is_callable($invoice)); // Outputs: true
+
+echo "<br>";
+
+$invoice();
+
+var_dump($invoice);
+
+
+echo "<br>";
+
+/////////////////////////////////////////////////////
+
+echo "<hr><h3>Traits Example</h3>";
+
+$coffeeMaker = new App\Traits\CoffeeMaker();
+$coffeeMaker->makeCoffee(); // Outputs: App\Traits\CoffeeMaker is making coffee
+
+$latteMaker = new App\Traits\LatteMaker();
+$latteMaker->makeCoffee(); // Outputs: App\Traits\LatteMaker is making coffee
+$latteMaker->makeLatte(); // Outputs: App\Traits\LatteMaker is making latte
+
+$cappuccinoMaker = new App\Traits\CappuccinoMaker();
+$cappuccinoMaker->makeCoffee(); // Outputs: App\Traits\CappuccinoMaker is making coffee
+$cappuccinoMaker->makeCappuccino(); // Outputs: App\Traits\CappuccinoMaker is making cappuccino
+
+$allInOneCoffeeMaker = new App\Traits\AllInOneCoffeeMaker();
+$allInOneCoffeeMaker->makeCoffee(); // Outputs: App\Traits\AllInOneCoffeeMaker is making coffee
+$allInOneCoffeeMaker->makeLatte(); // Outputs: App\Traits\AllInOneCoffeeMaker is making latte
+$allInOneCoffeeMaker->makeCappuccino(); // Outputs: App\Traits\AllInOneCoffeeMaker is making cappuccino
+
+echo "<br>";
+
+
+/**
+ * This code demonstrates the use of static properties in PHP traits.
+ * 
+ * By directly accessing and setting static properties on the trait names, each trait maintains its own static property,
+ * even if the property names are the same. This is because static properties in traits are not shared across traits or classes;
+ * they are scoped to the trait itself when accessed in this manner.
+ * 
+ * If this were implemented using inheritance (i.e., if LatteMaker and AllInOneCoffeeMaker were classes inheriting from a common parent class
+ * that defined the static $milkType property), then the static property would be shared among all child classes.
+ * Changing the value in one child class would affect the value seen in the other, because static properties in a class hierarchy are shared.
+ * 
+ * In summary:
+ * - With traits (as shown), static properties are independent per trait.
+ * - With inheritance, static properties are shared across the inheritance chain.
+ */
+\App\Traits\LatteMaker::$milkType = "Almond Milk";
+\App\Traits\AllInOneCoffeeMaker::$milkType = "Regular Milk";
+
+echo \App\Traits\AllInOneCoffeeMaker::$milkType . "<br>"; // Outputs: Regular Milk
+echo \App\Traits\LatteMaker::$milkType . "<br>"; // Outputs: Almond Milk
+
+///////////////////////////////////////////////////
+
+// Anonymous Class Example
+echo "<hr><h3>Anonymous Class Example</h3>";
+
+$anonymousClass = new class {
+    public function greet() {
+        return "Hello from the anonymous class!";
+    }
+};
+
+echo $anonymousClass->greet() . "<br>"; // Outputs: Hello from the anonymous class!
+
+// Anonymous class with properties and methods
+$anotherAnonymousClass = new class {
+    public string $name = "Anonymous";
+
+    public function sayHello() {
+        return "Hello, my name is " . $this->name;
+    }
+};
+
+echo $anotherAnonymousClass->sayHello() . "<br>"; // Outputs: Hello, my name is Anonymous
+
+// Anonymous object can't be reused or instantiated again, as it has no class name.
+// $anotherAnonymousClass = new class {
+//     public string $name = "Another Anonymous";
+// 
+//     public function sayHello() {
+//         return "Hello, my name is " . $this->name;
+//     }
+// };
+
+// echo $anotherAnonymousClass->sayHello() . "<br>"; // This will cause an error because the class is anonymous and cannot be instantiated again.
+
+// Anonymous class with a constructor
+$constructorAnonymousClass = new class("John") {
+    public string $name;
+
+    public function __construct(string $name) {
+        $this->name = $name;
+    }
+
+    public function introduce() {
+        return "Hello, my name is " . $this->name;
+    }
+};
+
+echo $constructorAnonymousClass->introduce() . "<br>"; // Outputs: Hello, my name is John
+
+// Returning an anonymous class from a function
+function createAnonymousClass() {
+    return new class { // this class cannot use parent class properties or methods but can extend classes or implement interfaces
+        public function getMessage() {
+            return "This is a message from the anonymous class returned by a function.";
+        }
+    };
+}
+
+$anonymousFromFunction = createAnonymousClass();
+echo $anonymousFromFunction->getMessage() . "<br>"; // Outputs: This is a message from the anonymous class returned by a function.
+
+// main use anonymous class is for testing purposes, where you can create a mock object without defining a full class.
+// keep usage of these classes outside the scope the are defined in, as they are not reusable.
+// avoid hitting the autoloader for trivial implementations.
+
+/////////////////////////////////////////
+
+
+//Variable Storage & Object Comparison
+echo "<hr><h3>Variable Storage & Object Comparison</h3>";
+$invoice1 = new App\Invoice(200, "Invoice");
+$invoice2 = new App\Invoice(200, "Invoice");
+
+$invoice3 = $invoice1; // $invoice3 is a reference to the same object as $invoice1
+
+echo "<strong>Comparing two different Invoice objects:</strong><br>";
+if ($invoice1 === $invoice2) {
+    echo "Both invoices are the same object.<br>";
+} else {
+    echo "Invoices are different objects.<br>";
+}
+
+if ($invoice1 == $invoice2) {
+    echo "Invoices are equal in value.<br>";
+} else {
+    echo "Invoices are not equal in value.<br>";
+}
+
+echo "<strong>Comparing Invoice object with itself (reference check):</strong><br>";
+if ($invoice1 == $invoice3) {
+    echo "Invoice1 is the same object as itself.<br>";
+} else {
+    echo "Invoice1 is not the same object as itself.<br>";
+}
+
+echo "<strong>Comparing Invoice1 with Invoice3 (reference):</strong><br>";
+if ($invoice1 === $invoice3) {
+    echo "Invoice1 and Invoice3 are the same object (reference).<br>";
+} else {
+    echo "Invoice1 and Invoice3 are different objects.<br>";
+}
+
+
+$invoice4 = new App\Invoice(200, "Invoice");
+$invoice5 = new App\CustomInvoice(200, "Invoice");
+
+echo "<strong>Comparing Invoice4 with CustomInvoice5:</strong><br>";
+if ($invoice4 === $invoice5) {
+    echo "Invoice4 and CustomInvoice5 are the same object.<br>";
+} else {
+    echo "Invoice4 and CustomInvoice5 are different objects.<br>";
+}
+
+if ($invoice4 == $invoice5) {
+    echo "Invoice4 and CustomInvoice5 are equal in value.<br>";
+} else {
+    echo "Invoice4 and CustomInvoice5 are not equal in value.<br>";
+}
+
+///////////////////////////////////////////
+
+// cloning objects
+echo "<hr><h3>Cloning Objects Example</h3>";
+
+$originalInvoice = new App\Invoice(300, "Original Invoice");
+$clonedInvoice = clone $originalInvoice; // Create a clone of the original invoice, constructor not called when cloning an object
+
+echo "<strong>Original Invoice:</strong> ";
+var_dump($originalInvoice);
+echo "<br>";
+
+echo "<strong>Cloned Invoice:</strong> ";
+var_dump($clonedInvoice);
+echo "<br>";
+
+if ($originalInvoice === $clonedInvoice) {
+    echo "Both invoices are the same object.<br>";
+} else {
+    echo "Invoices are different objects.<br>";
+}
+
+if ($originalInvoice == $clonedInvoice) {
+    echo "Invoices are equal in value.<br>";
+} else {
+    echo "Invoices are not equal in value.<br>";
+}
+
+///////////////////////////////////////////
+
+// Serializing and unserializing objects and serialize magic methods
+echo "<hr><h3>Serialization Example</h3>";
+
+echo serialize(true) . "<br>"; // Outputs: b:1;
+echo serialize(1) . "<br>"; // Outputs: i:1;
+echo serialize(1.5) . "<br>"; // Outputs: d:1.5;
+echo serialize("Hello") . "<br>"; // Outputs: s:5:"Hello";
+echo serialize([1, 2, 3]) . "<br>"; // Outputs: a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}
+echo serialize(['a' => 1,'b' => 2]) . "<br>"; // Outputs serialized object
+echo var_dump(unserialize(serialize(['a' => 1,'b' => 2]))) . "<br>"; // Outputs: array(2) { ["a"]=> int(1) ["b"]=> int(2) }
+
+$serializedInvoice = serialize($originalInvoice);
+echo "<strong>Serialized Original Invoice:</strong> " . $serializedInvoice . "<br>";
+
+$unserializedInvoice = unserialize($serializedInvoice);
+echo "<strong>Unserialized Invoice:</strong> ";
+var_dump($unserializedInvoice);
+echo "<br>";
+
+//////////////////////////////////////////////////
+
+// OOP error handling
+echo "<hr><h3>OOP Error Handling Example</h3>";
+
+// error hierarchy in PHP : https://www.php.net/manual/en/language.errors.php7.php
+// Global Exception Handler : https://www.php.net/manual/en/function.set-exception-handler.php
+// SPL Exceptions Class Tree : https://www.php.net/manual/en/spl.exceptions.php 
+
+
+
+$invoiceE = new App\ErrorH\CustomerInvoice(new App\ErrorH\Customer());
+
+try {
+$invoiceE->process(100); // Process the invoice with a valid amount
+} catch (App\ErrorH\MissingBillingInfoException|InvalidArgumentException $e) {
+    echo "Error: " . $e->getMessage() . "<br>";
+}
+try {
+$invoiceE->process(-50); // Attempt to process with an invalid amount (-50) to trigger an exception
+} catch (Exception $e) {
+    echo "General Error: " . $e->getMessage() . "<br>";
+} finally { // This block always executes, regardless of whether an exception was thrown
+    echo "Processing completed.<br>";
+}
+
+set_exception_handler(function (\Throwable $e) {
+    echo "Custom Exception Handler: " . $e->getMessage() . "<br>";
+});
+
+// Trigger an exception to test the custom handler
+try {
+    throw new App\ErrorH\MissingBillingInfoException("Billing information is missing.");
+} catch (App\ErrorH\MissingBillingInfoException $e) {
+    echo "Caught Exception: " . $e->getMessage() . "<br>";
+}
+
+
+echo "<hr>";

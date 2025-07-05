@@ -53,6 +53,6 @@ class GarageService
         $service = $vehicle->performService();
         $cost = $vehicle->getServiceCost();
         
-        return "Mechanic {$mechanicName} completed: {$service} - Cost: ${cost}";
+        return "Mechanic {$mechanicName} completed: {$service} - Cost: {$cost}";
     }
 }
