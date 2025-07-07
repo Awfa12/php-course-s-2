@@ -4,6 +4,11 @@ declare(strict_types=1); // Enforce strict type checking
 
 require_once '../app/Transaction.php'; // Include the Transaction class
 
+define('STORAGE_PATH', __DIR__ . '/../storage');
+
+session_start();
+setcookie('user', 'John Doe', time() + 3600, '/'); // Set a cookie for 1 hour
+
 // --- Classes & Objects ---
 
 echo "<h3>Transaction Example</h3>";
@@ -879,6 +884,294 @@ try {
 } catch (App\ErrorH\MissingBillingInfoException $e) {
     echo "Caught Exception: " . $e->getMessage() . "<br>";
 }
+
+
+//////////////////////////////////////////
+
+//DateTime objects in PHP
+echo "<hr><h3>DateTime Objects Example</h3>";
+
+$dateTime = new DateTime();
+
+echo "<strong>Current Date and Time:</strong> ";
+echo $dateTime->format('Y-m-d H:i:s') . "<br>"; // Outputs the current date and time in 'Y-m-d H:i:s' format
+
+$dateTime->setTimezone(new DateTimeZone('Europe/Amsterdam'));
+echo "<strong>Current Date and Time in Europe/Amsterdam:</strong> ";
+echo $dateTime->format('Y-m-d H:i:s') . "<br>"; // Outputs the current date and time in 'Y-m-d H:i:s' format for the specified timezone
+echo "<br>";
+
+$dateTime2 = new DateTime('2023-10-01 3:30PM', new DateTimeZone('Europe/Amsterdam'));
+// ref: https://www.php.net/manual/en/timezones.php 
+
+echo "<strong>DateTime Object with Specific Date and Time:</strong> ";
+echo $dateTime2->getTimezone()->getName() . '/' . $dateTime2->format('Y-m-d H:i:s') . "<br>"; // Outputs the specified date and time in 'Y-m-d H:i:s' format
+echo "<br>";
+
+$dateTime3 = new DateTime('2023-10-01 3:30PM', new DateTimeZone('America/New_York'));
+echo "<strong>DateTime Object with Specific Date and Time in America/New_York:</strong> ";
+echo $dateTime3->getTimezone()->getName() . '/' . $dateTime3->format('Y-m-d H:i:s') . "<br>";
+echo "<br>";
+// set new date
+$dateTime3->setDate(2023, 12, 25)->setTime(10,10); // Set to Christmas 2023
+echo "<strong>DateTime Object after setting new date:</strong> ";
+echo $dateTime3->getTimezone()->getName() . '/' . $dateTime3->format('m/d/Y g:i A') . "<br>";
+echo "<br>";
+
+// CreateFromFormat Example
+$date = '2023-10-01 3:30PM';
+$dateTime4 = DateTime::createFromFormat('Y-m-d g:iA', $date, new DateTimeZone('Europe/Amsterdam'));
+// with createFromFormat if you don't specify the time, it will use the current time
+echo "<strong>DateTime Object created from format:</strong> ";
+if ($dateTime4 !== false) {
+    echo $dateTime4->getTimezone()->getName() . '/' . $dateTime4->format('d/m/Y g:iA') . "<br>";
+} else {
+    echo "Failed to create DateTime object from format.<br>";
+}
+echo "<br>";
+
+// Comparing DateTime Objects
+$dateTime5 = new DateTime('2023-10-01 9:15 AM');
+$dateTime6 = new DateTime('2023-06-25 9:14 AM');
+
+echo "<strong>Comparing DateTime Objects:</strong><br>";
+
+var_dump($dateTime5 == $dateTime6); // Outputs: bool(false) 
+echo "<br>";
+
+var_dump($dateTime5 < $dateTime6); // Outputs: bool(false)
+echo "<br>";
+
+var_dump($dateTime5 > $dateTime6); // Outputs: bool(true)
+echo "<br>";
+
+// difference between two DateTime objects
+$interval = $dateTime5->diff($dateTime6);
+// ref: https://www.php.net/manual/en/dateinterval.format.php
+// ref: https://www.php.net/manual/en/dateinterval.construct.php
+echo "<strong>Difference between two DateTime objects:</strong> ";
+echo $interval->format('%m months %d days %h hours %i minutes %s seconds') . "<br>"; // Outputs: 0 days 0 hours 1 minutes 0 seconds
+echo "<br>";
+
+$interval2 = new DateInterval('P1Y2M3DT4H5M6S'); // 1 year, 2 months, 3 days, 4 hours, 5 minutes, 6 seconds
+echo "<strong>Interval created from string:</strong> ";
+echo $interval2->format('%y years %m months %d days %h hours %i minutes %s seconds') . "<br>"; // Outputs: 1 years 2 months 3 days 4 hours 5 minutes 6 seconds
+echo "<br>";
+
+// Adding and subtracting intervals
+$dateTime7 = new DateTime('2023-10-01 3:30PM', new DateTimeZone('Europe/Amsterdam'));
+$dateTime7->add($interval2); // Add the interval to the DateTime object
+echo "<strong>DateTime after adding interval:</strong> ";
+echo $dateTime7->getTimezone()->getName() . '/' . $dateTime7->format('Y-m-d H:i:s') . "<br>"; // Outputs the date after adding the interval
+echo "<br>";
+
+$dateTime7->sub($interval2); // Subtract the interval from the DateTime object
+echo "<strong>DateTime after subtracting interval:</strong> ";
+echo $dateTime7->getTimezone()->getName() . '/' . $dateTime7->format('Y-m-d H:i:s') . "<br>"; // Outputs the date after subtracting the interval
+echo "<br>";
+
+// invert flag is used to invert the interval, so if you add an inverted interval, it will subtract it
+$interval2->invert = 1; // Invert the interval
+$dateTime7->add($interval2); // Add the inverted interval to the DateTime object
+echo "<strong>DateTime after adding inverted interval:</strong> ";
+echo $dateTime7->getTimezone()->getName() . '/' . $dateTime7->format('Y-m-d H:i:s') . "<br>"; // Outputs the date after adding the inverted interval
+echo "<br>";
+
+// DateTime Immutable is a class that represents date and time in an immutable way, meaning that once created, the object cannot be changed.
+// Any modification to a DateTimeImmutable object will return a new instance with the modified date and time.
+echo "<hr><h3>DateTime Immutable Example</h3>";
+
+$dateTimeImmutable = new DateTimeImmutable('2023-10-01 3:30PM', new DateTimeZone('Europe/Amsterdam'));
+echo "<strong>Current Date and Time (Immutable):</strong> ";
+echo $dateTimeImmutable->getTimezone()->getName() . '/' . $dateTimeImmutable->format('Y-m-d H:i:s') . "<br>"; // Outputs the current date and time in 'Y-m-d H:i:s' format
+
+// Attempting to modify the immutable object will return a new instance
+$newDateTimeImmutable = $dateTimeImmutable->add(new DateInterval('P1D')); // Add 1 day
+echo "<strong>New Date and Time after adding 1 day (Immutable):</strong> ";
+echo $newDateTimeImmutable->getTimezone()->getName() . '/' . $newDateTimeImmutable->format('Y-m-d H:i:s') . "<br>"; // Outputs the new date and time after adding 1 day
+
+// Original DateTimeImmutable object remains unchanged
+echo "<strong>Original DateTimeImmutable remains unchanged:</strong> ";
+echo $dateTimeImmutable->getTimezone()->getName() . '/' . $dateTimeImmutable->format('Y-m-d H:i:s') . "<br>"; // Outputs the original date and time
+
+// Creating a new DateTimeImmutable object with a different timezone
+$dateTimeImmutable2 = new DateTimeImmutable('2023-10-01 3:30PM', new DateTimeZone('America/New_York'));
+echo "<strong>DateTimeImmutable Object with Specific Date and Time in America/New_York:</strong> ";
+echo $dateTimeImmutable2->getTimezone()->getName() . '/' . $dateTimeImmutable2->format('Y-m-d H:i:s') . "<br>";
+echo "<br>";
+
+// Period Example
+echo "<hr><h3>Period Example</h3>";
+
+$start = new DateTime('2023-01-01');
+$end = new DateTime('2023-12-31');
+$period = new DatePeriod($start, new DateInterval('P1M'), $end); // Monthly period
+
+echo "<strong>Date Period (Monthly):</strong><br>";
+foreach ($period as $date) {
+    echo $date->format('Y-m-d') . "<br>"; // Outputs each month in the period
+}
+
+echo "<br>";
+// DatePeriod with specific intervals
+$start = new DateTime('2023-01-01');
+$end = new DateTime('2023-12-31');
+$period2 = new DatePeriod($start, new DateInterval('P2M'), $end); // Every 2 months
+
+echo "<strong>Date Period (Every 2 Months):</strong><br>";
+foreach ($period2 as $date) {
+    echo $date->format('Y-m-d') . "<br>"; // Outputs every 2 months in the period
+}
+
+echo "<br>";
+
+//  Use Carbon library for more advanced date manipulation
+// https://carbon.nesbot.com/docs/
+//////////////////////////////////////////
+
+// Iterate over objects
+echo "<hr><h3>Iterating Over Objects Example</h3>";
+
+$objects = [
+    new App\Invoice(100, "Invoice 1"),
+    new App\Invoice(200, "Invoice 2"),
+    new App\Invoice(300, "Invoice 3")
+];
+
+echo "<strong>Iterating over objects:</strong><br>";
+foreach ($objects as $object) {
+    echo "Amount: " . $object->amount . ", Description: " . $object->description . "<br>";
+}
+
+$invoiceCollection = new App\InvoiceCollection($objects);
+
+echo "<strong>Iterating over InvoiceCollection:</strong><br>";
+foreach ($invoiceCollection as $invoice) {
+    echo "Amount: " . $invoice->amount . ", Description: " . $invoice->description . "<br>";
+}
+
+// iterable type hinting
+echo "<hr><h3>Iterable Type Hinting Example</h3>";
+// This function accepts any iterable type (array, object implementing Traversable, etc.)
+/**
+ * Processes a collection of invoices.
+ *
+ * @param iterable $invoices A collection of Invoice objects.
+ */
+// This function demonstrates how to work with an iterable type hint in PHP.
+// It accepts any iterable type, such as an array or an object implementing Traversable.
+// The function iterates over the invoices and processes each one.
+// It outputs the amount and description of each invoice.
+// This is useful for working with collections of objects in a flexible way.
+function processInvoices(iterable $invoices) {
+    echo "<strong>Processing Invoices:</strong><br>";
+    foreach ($invoices as $invoice) {
+        echo "Amount: " . $invoice->amount . ", Description: " . $invoice->description . "<br>";
+    }
+}
+
+processInvoices($invoiceCollection); // Pass the InvoiceCollection to the function
+
+////////////////////////////////////////////////////////
+
+// PHP Superglobals - Basic Routing Using The Server Info
+echo "<hr><h3>PHP Superglobals - Basic Routing Using The Server Info</h3>";
+
+// echo "<pre>";
+// print_r($_SERVER); // Outputs the $_SERVER superglobal array
+// echo "</pre>";
+
+//////////////////
+
+// $router = new App\Router();
+// $router->register('/', function() {
+//     echo "Welcome to the home page!" . "<br>";
+// });
+
+// $router->register('/invoices', function() {
+//     echo "Welcome to the invoices page!" . "<br>";
+    
+// });
+
+// echo "<strong>Current Request URI:</strong> " . $_SERVER['REQUEST_URI'] . "<br>";
+
+// // Route the request based on the current URI
+// if ($_SERVER['REQUEST_URI'] === '/' || $_SERVER['REQUEST_URI'] === '/invoices') {
+//     echo $router->resolve($_SERVER['REQUEST_URI']);
+// }
+
+/////////////////////////
+
+//$router2 = new App\Router();
+
+// best way to register routes
+// $router2
+//     ->register('/', [App\Home::class, 'index'])
+//     ->register('/invoices', [App\Invoice::class, 'index'])
+//     ->register('/invoices/create', [App\Invoice::class, 'create']);
+
+// echo "<strong>Current Request URI (Router2):</strong> " . $_SERVER['REQUEST_URI'] . "<br>";
+
+// echo $router2->resolve($_SERVER['REQUEST_URI']);
+
+//////////////////////////////////////
+
+// post and get requests
+echo "<hr><h3>POST and GET Requests Example</h3>";
+
+
+
+$router3 = new App\Router();
+
+// Registering routes with GET and POST methods
+$router3
+    ->get('/', [App\Home::class, 'index'])
+    ->post('/upload', [App\Home::class, 'upload'])
+    ->get('/invoices', [App\Invoice::class, 'index'])
+    ->get('/invoices/create', [App\Invoice::class, 'create'])
+    ->post('/invoices/create', [App\Invoice::class, 'store']);
+
+
+echo $router3->resolve($_SERVER['REQUEST_URI'], strtolower($_SERVER['REQUEST_METHOD'])); 
+
+///////////////////////////////////////////////////////////
+
+// Session Management Example
+echo "<hr><h3>Session Management Example</h3>";
+
+// session_start(); // Start the session in the beginning of the script (look at the top of the file)
+// increase counter in home page and unset in invoices page
+var_dump($_SESSION);
+echo "<br>";
+var_dump($_COOKIE);
+echo "<br>";
+
+
+////////////////////////////////////////
+
+
+// File Upload Example
+echo "<hr><h3>File Upload Example</h3>";
+
+// define the storage path in the beginning of the script
+
+/* ref :
+https://www.php.net/manual/en/features.file-upload.post-method.php
+https://www.php.net/manual/en/function.move-uploaded-file.php
+https://www.php.net/manual/en/features.file-upload.php
+https://www.php.net/manual/en/features.file-upload.errors.php
+https://www.php.net/manual/en/features.file-upload.common-pitfalls.php
+https://www.php.net/manual/en/features.file-upload.multiple.php
+
+*/
+
+/* php.ini
+file_uploads
+upload_tmp_dir
+upload_max_filesize
+max_file_uploads
+max_input_time
+*/
 
 
 echo "<hr>";

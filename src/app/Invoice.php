@@ -7,12 +7,57 @@ class Invoice
     protected array $data;
     private int $id = 1;
 
-    public function __construct(public float $amount, public string $description){
+    public function __construct(public float $amount = 0, public string $description = "No description provided"){
         $this->data = [
             'amount' => $amount,
             'description' => $description,
         ];
         
+    }
+
+    public function index(): string
+    {
+        unset($_SESSION['count']);
+        var_dump($_SESSION);
+        return "Welcome to the Invoice Page!";
+    }
+
+    public function create(): string
+    {
+        echo '<pre>';
+        var_dump("Creating invoice with the following data:");
+        var_dump($_REQUEST);
+        echo '</pre>';
+
+        echo '<pre>';
+        var_dump("GET data received:");
+        var_dump($_GET);
+        echo '</pre>';
+
+        echo '<pre>';
+        var_dump("POST data received:");
+        var_dump($_POST);
+        echo '</pre>';
+
+        $this->processPayment($this->amount, $this->description);
+        return '<form method="post" action="/invoices/create">
+                <label for="amount">Amount:</label>
+                <input type="number" name="amount" id="amount" value="' . htmlspecialchars($this->amount) . '" required>
+                <br>
+                <label for="description">Description:</label>
+                <input type="text" name="description" id="description" value="' . htmlspecialchars($this->description) . '" required>
+                <br>
+                <button type="submit">Create Invoice</button>
+            </form>';
+
+    }
+
+    public function store() {
+        $amount = $_POST['amount'] ?? 0;
+        $description = $_POST['description'] ?? 'No description provided';
+
+        var_dump("Storing invoice with amount: {$amount} and description: {$description}");
+        echo "<br>";
     }
 
     public function __clone()
