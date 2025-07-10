@@ -27,3 +27,17 @@ Thumbs.db
 
 # Ignore PHPStorm and other IDE metadata
 *.iml
+
+# Ignore MySQL runtime files
+docker/storage/mysql/*.sock
+docker/storage/mysql/*.pid
+docker/storage/mysql/*.err
+docker/storage/mysql/*.ibd
+docker/storage/mysql/*.cnf
+docker/storage/mysql/*.index
+docker/storage/mysql/ib*
+
+# Ignore everything in MySQL data folder
+docker/storage/mysql/*
+# Except keep the folder (optional)
+!docker/storage/mysql/.gitkeep
