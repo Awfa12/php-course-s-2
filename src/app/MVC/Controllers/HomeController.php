@@ -17,8 +17,7 @@ class HomeController
 
     public function index(): view
     {
-
-        $email = 'ww@gmail.com';
+        $email = 'eeee@gmail.com';
         $name = 's';
         $amount = 25;
 

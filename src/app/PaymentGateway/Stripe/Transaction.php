@@ -23,7 +23,7 @@ class Transaction {
     }
 
     public function process() {
-        echo 'Processing $' . $this->amount . ' transaction <br/>';
+        echo "Processing \${$this->amount} transaction <br/>";
     }
 
     // We can use the private property $amount here 

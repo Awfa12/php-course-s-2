@@ -5,6 +5,8 @@ declare(strict_types=1); // Enforce strict type checking
 require_once '../app/Transaction.php'; // Include the Transaction class
 
 define('STORAGE_PATH', __DIR__ . '/../storage');
+define('VIEW_PATH', __DIR__ . '/../app/MVC/Views');
+
 
 session_start();
 setcookie('user', 'John Doe', time() + 3600, '/'); // Set a cookie for 1 hour
@@ -182,6 +184,11 @@ echo '<br>';
 
 
 require __DIR__ . '/../vendor/autoload.php';
+
+
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->load();
+
 
 echo "<hr><h3>Namespace Imports and Object Instantiation</h3>";
 
@@ -1121,18 +1128,18 @@ echo "<hr><h3>POST and GET Requests Example</h3>";
 
 
 
-$router3 = new App\Router();
+// $router3 = new App\Router();
 
 // Registering routes with GET and POST methods
-$router3
-    ->get('/', [App\Home::class, 'index'])
-    ->post('/upload', [App\Home::class, 'upload'])
-    ->get('/invoices', [App\Invoice::class, 'index'])
-    ->get('/invoices/create', [App\Invoice::class, 'create'])
-    ->post('/invoices/create', [App\Invoice::class, 'store']);
+// $router3
+//     ->get('/', [App\Home::class, 'index'])
+//     ->post('/upload', [App\Home::class, 'upload'])
+//     ->get('/invoices', [App\Invoice::class, 'index'])
+//     ->get('/invoices/create', [App\Invoice::class, 'create'])
+//     ->post('/invoices/create', [App\Invoice::class, 'store']);
 
 
-echo $router3->resolve($_SERVER['REQUEST_URI'], strtolower($_SERVER['REQUEST_METHOD'])); 
+//echo $router3->resolve($_SERVER['REQUEST_URI'], strtolower($_SERVER['REQUEST_METHOD'])); 
 
 ///////////////////////////////////////////////////////////
 
@@ -1172,6 +1179,30 @@ upload_max_filesize
 max_file_uploads
 max_input_time
 */
+
+//////////////////////////////////////////////////
+echo "<hr><h3>MVC</h3>";
+use App\App;
+use App\MVC\Controllers\InvoiceController;
+use App\MVC\Controllers\HomeController;
+use App\Router;
+use App\Config;
+
+
+$router4 = new Router();
+
+$router4
+    ->get('/', [HomeController::class, 'index'])
+    ->post('/upload', [HomeController::class, 'upload'])
+    ->get('/invoices', [InvoiceController::class, 'index'])
+    ->get('/invoices/create', [InvoiceController::class, 'create'])
+    ->post('/invoices/create', [InvoiceController::class, 'store']);
+
+(new App(
+    $router4,
+    ['uri' => $_SERVER['REQUEST_URI'], 'method' => $_SERVER['REQUEST_METHOD']],
+    new Config($_ENV)
+))->run();    
 
 
 echo "<hr>";

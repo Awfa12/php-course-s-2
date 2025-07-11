@@ -33,7 +33,7 @@ class Invoice extends Model
 
         $Stmt->execute([$id]);
 
-        $invoice = $Stmt->fetch();
+        $invoice = $Stmt->fetch(\PDO::FETCH_OBJ);
 
         return $invoice ?? [];
     }
